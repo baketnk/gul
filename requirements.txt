@@ -1,0 +1,6 @@
+pypdf2
+bs4
+requests
+torch==2.3.1
+pyyaml
+transformers

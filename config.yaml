@@ -1,0 +1,2 @@
+document_store:
+  local_directory: ./documents
