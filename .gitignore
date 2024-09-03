@@ -1,0 +1,6 @@
+i.DS_Store
+**.pyc
+documents
+models
+private
+embeddings.json

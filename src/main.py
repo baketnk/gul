@@ -5,55 +5,16 @@ import os
 import yaml
 from .importers import import_url
 from .vectorsearch import VectorSearch 
-from .embed_base import BaseEmbeddingModel
-from .embed import JinaEmbeddingModel
-from .embed_mxbai import MxbaiEmbeddingModel
 from pathlib import Path
 from .config import config
 
-ORIGINAL_MODEL_PATH = './models/jina-embeddings-v2-base-code'
-FINE_TUNED_MODEL_PATH = './models/fine_tuned_jina_embeddings_ft'
-
-DEBUG_MODEL=False
-
-def get_embedding_model(use_original=False, use_mxbai=False):
-    if use_mxbai:
-        return MxbaiEmbeddingModel('./models/mxbai-embed-large-v2')
-    if use_original:
-        return JinaEmbeddingModel(ORIGINAL_MODEL_PATH)
-    if os.path.exists(FINE_TUNED_MODEL_PATH):
-        return JinaiEmbeddingModel(FINE_TUNED_MODEL_PATH)
-    raise FileNotFoundError("Fine-tuned model not found. Please run the 'finetune' command first.")
-
 def search(query: str) -> List[dict]:
-    model = get_embedding_model(use_original=DEBUG_MODEL)
-    vector_search = VectorSearch(model)
+    vector_search = VectorSearch()
     return vector_search.search(query)
 
 
 def finetune(args):
-    if not config:
-        print("Error: Could not load configuration.")
-        sys.exit(1)
-
-    documents_dir = config.get('document_store').get('local_directory')
-    documents = load_documents(documents_dir)
-
-    print("Fine-tuning the model...")
-    original_model = JinaEmbeddingModel(ORIGINAL_MODEL_PATH)
-    fine_tuned_model.fine_tune(
-        documents,
-        epochs=args.epochs,
-        batch_size=args.batch_size,
-        log_every=args.log_every,
-        learning_rate=args.learning_rate,
-        warmup_steps=args.warmup_steps,
-        early_stopping_patience=args.early_stopping_patience,
-        max_length=args.max_length,
-        accumulation_steps=args.accumulation_steps
-    )
-    print("Fine-tuning completed.")
-    print(f"Fine-tuned model saved to: {FINE_TUNED_MODEL_PATH}")
+   raise NotImplementedError()
 
 def main():
     parser = argparse.ArgumentParser(description="Document processing and search tool")
@@ -84,8 +45,7 @@ def main():
 
     if args.command == "import":
         try:
-            model = get_embedding_model()
-            vector_search = VectorSearch(model)
+            vector_search = VectorSearch()
             import_url(args.uri, vector_search)
         except FileNotFoundError as e:
             print(f"Error: {e}")
@@ -102,9 +62,8 @@ def main():
         finetune(args)
     elif args.command == "regenerate":
         try:
-            model = get_embedding_model(use_original=DEBUG_MODEL)
-            vector_search = VectorSearch(model)
-            documents_dir = Path(config.get('document_store').get('local_directory'))
+            vector_search = VectorSearch()
+            documents_dir = config.get('document_store').get('local_directory')
             vector_search.regenerate_embeddings(documents_dir)
         except FileNotFoundError as e:
             print(f"Error: {e}")
